@@ -26,7 +26,7 @@ XojOpenDlg::XojOpenDlg(GtkWindow* win, Settings* settings)
 	else
 	{
 		g_warning("lastOpenPath is not set!");
-		currentFolder = g_get_home_dir();
+		currentFolder = g_get_current_dir();
 	}
 	gtk_file_chooser_set_current_folder_uri(GTK_FILE_CHOOSER(dialog), currentFolder);
 }
