@@ -35,6 +35,7 @@ enum AVAILABLECURSORS
 	CRSR_BLANK_CURSOR,
 	CRSR_XTERM,
 	CRSR_DEFAULT,
+	CRSR_PENCIL,
 	CRSR_HAND2,
 	CRSR_TCROSS,
 	CRSR_PENORHIGHLIGHTER,
@@ -86,6 +87,7 @@ XournalppCursor::XournalppCursor(Control* control)
 	cssCursors[CRSR_BLANK_CURSOR        ] = 	{"none", 		""					};
 	cssCursors[CRSR_XTERM               ] = 	{"text", 		""					};
 	cssCursors[CRSR_DEFAULT             ] = 	{"default", 	""					};
+	cssCursors[CRSR_PENCIL              ] = 	{"pencil", 	"arrow"			};
 	cssCursors[CRSR_HAND2               ] = 	{"hand2", 		""					};
 	cssCursors[CRSR_TCROSS              ] = 	{"crosshair", 	""					};
 	cssCursors[CRSR_PENORHIGHLIGHTER    ] = 	{"",""};			// custom cursors - enum used only for check
@@ -305,21 +307,23 @@ void XournalppCursor::updateCursor()
 		}
 		else if (type == TOOL_PEN || type == TOOL_HILIGHTER)
 		{
-			if (this->inputDevice == INPUT_DEVICE_MOUSE && !this->mouseDown)  // mouse and not pressed
-			{
-				setCursor(CRSR_ARROW);
-			}
-			else
-			{
+//			if (this->inputDevice == INPUT_DEVICE_MOUSE && !this->mouseDown)  // mouse and not pressed
+//			{
+//				setCursor(CRSR_PENCIL);
+//			}
+//			else
+//			{
 				if (type == TOOL_PEN)
 				{
 					cursor = getPenCursor();
+//                    setCursor(CRSR_PENCIL);
 				}
 				else  // must be:  if (type == TOOL_HILIGHTER)
 				{
-					cursor = getHighlighterCursor();
+                    cursor = getHighlighterCursor();
+//                    setCursor(CRSR_PENCIL);
 				}
-			}
+//			}
 		}
 		else if (type == TOOL_ERASER)
 		{
@@ -420,7 +424,7 @@ GdkCursor* XournalppCursor::getHighlighterCursor()
 	}
 	else
 	{
-		return createHighlighterOrPenCursor(5, 120 / 255.0);
+		return createHighlighterOrPenCursor(0.5);
 	}
 }
 
@@ -435,27 +439,43 @@ GdkCursor* XournalppCursor::getPenCursor()
 	}
 	else
 	{
-		return createHighlighterOrPenCursor(3, 1.0);
+		return createHighlighterOrPenCursor(1);
 	}
 }
 
 
-GdkCursor* XournalppCursor::createHighlighterOrPenCursor(int size, double alpha)
+GdkCursor* XournalppCursor::createHighlighterOrPenCursor(double alpha)
 {
 	XOJ_CHECK_TYPE(XournalppCursor);
 
-	int rgb = control->getToolHandler()->getColor();
+	// window must already be created
+	XournalView* view = control->getWindow()->getXournal();
+	ToolHandler* handler = control->getToolHandler();
+	double thick = handler->getThickness();
+	double zoom = view->getZoom();
+
+	double size = std::max(4.0, thick * zoom);
+	double dotsize = size / 2;
+//	double bordersize = size / 10;
+	double brightsize = 30;
+//	size += bordersize * 2 + 1;
+
+	int rgb = handler->getColor();
 	double r = ((rgb >> 16) & 0xff) / 255.0;
 	double g = ((rgb >> 8) & 0xff) / 255.0;
 	double b = (rgb & 0xff) / 255.0;
 	bool big = control->getSettings()->isShowBigCursor();
 	bool bright = control->getSettings()->isHighlightPosition();
-	int height = size;
-	int width = size;
+	int height = (int)ceil(size);
+	int width = (int)ceil(size);
 
 	// create a hash of variables so we notice if one changes despite being the same cursor type:
-	gulong flavour =
-	        (big ? 1 : 0) | (bright ? 2 : 0) | (gulong)(64 * alpha) << 2 | (gulong) size << 9 | (gulong) rgb << 14;
+	gulong flavour = (big ? 1 : 0)
+				   | (bright ? 2 : 0)
+				   | (gulong)(64 * alpha) << 2
+				   | (gulong) size << 9
+				   | (gulong) rgb << 14
+				   ;
 
 	if (CRSR_PENORHIGHLIGHTER == this->currentCursor && flavour == this->currentCursorFlavour) return NULL;
 	this->currentCursor = CRSR_PENORHIGHLIGHTER;
@@ -463,7 +483,8 @@ GdkCursor* XournalppCursor::createHighlighterOrPenCursor(int size, double alpha)
 
 	if (big || bright)
 	{
-		height = width = 60;
+		height += brightsize * 2;
+		width += brightsize * 2;
 	}
 
 	// We change the drawing method, now the center with the colored dot of the pen
@@ -474,28 +495,52 @@ GdkCursor* XournalppCursor::createHighlighterOrPenCursor(int size, double alpha)
 	cairo_surface_t* crCursor = cairo_image_surface_create(CAIRO_FORMAT_ARGB32, width, height);
 	cairo_t* cr = cairo_create(crCursor);
 
+	// Draw colored dot under optional pencil
+	cairo_set_source_rgba(cr, r, g, b, alpha);
+	// Correct the offset of the coloured dot for big-cursor mode
+	//cairo_rectangle(cr, centerX, centerY, size, size);
+	cairo_arc(cr, centerX, centerY, dotsize, 0, 2 * M_PI);
+	//cairo_stroke_preserve(cr);
+	cairo_fill(cr);
+
+//	// Dot border
+//	cairo_set_source_rgba(cr, 1-r, 1-g, 1-b, alpha);
+//	cairo_set_line_width(cr, bordersize);
+//	cairo_arc(cr, centerX, centerY, dotsize + bordersize / 2, 0, 2 * M_PI);
+//	cairo_stroke(cr);
+
 	if (big)
 	{
-		// When using highlighter, paint the icon with the current color
-		if (size == 5)
-		{
+		// Pencil cursor
+
+//		// When using highlighter, paint the icon with the current color
+//		if (size == 5)
+//		{
 			cairo_set_source_rgb(cr, r, g, b);
-		}
-		else
-		{
-			cairo_set_source_rgb(cr, 1, 1, 1);
-		}
-		cairo_set_line_width(cr, 1.2);
+//		}
+//		else
+//		{
+//			cairo_set_source_rgb(cr, 1, 1, 1);
+//		}
+		cairo_set_line_width(cr, 1.1);
 
 		// Starting point
-		cairo_move_to(cr, centerX + 2, centerY);
-		// Pencil cursor
-		cairo_line_to(cr, centerX + 2, centerY - 4);
-		cairo_line_to(cr, centerX + 15, centerY - 17.5);
-		cairo_line_to(cr, centerX + 19, centerY - 14);
-		cairo_line_to(cr, centerX + 6, centerY);
+		int hyp = sqrt(0.5) * ceil(dotsize) + 1;
+		int cx = centerX + hyp,
+		    cy = centerY - hyp;
 
+		cairo_move_to(cr, cx, cy);
+		cairo_line_to(cr, cx, cy - 4);
+		cairo_line_to(cr, cx + 13, cy - 17.5);
+		cairo_line_to(cr, cx + 17, cy - 14);
+		cairo_line_to(cr, cx + 4, cy);
 		cairo_close_path(cr);
+		//    3
+		//  /  \
+		// 2    4
+		// |   /
+		// 1-5
+
 		cairo_fill_preserve(cr);
 		cairo_set_source_rgb(cr, 0, 0, 0);
 		cairo_stroke(cr);
@@ -503,21 +548,17 @@ GdkCursor* XournalppCursor::createHighlighterOrPenCursor(int size, double alpha)
 		cairo_fill_preserve(cr);
 	}
 
-	if (bright)
+	if (bright && size < brightsize * 2)
 	{
 		// A yellow transparent circle with no border
 		cairo_set_line_width(cr, 0);
 		cairo_set_source_rgba(cr, 255, 255, 0, 0.5);
-        cairo_arc(cr, centerX, centerY, 30, 0, 2 * M_PI);
-        cairo_fill_preserve(cr);
+		cairo_arc(cr, centerX, centerY, brightsize, 0, 2 * M_PI);
+		cairo_fill_preserve(cr);
 		cairo_set_source_rgb(cr, 0, 0, 0);
 		cairo_stroke(cr);
 	}
 
-	cairo_set_source_rgba(cr, r, g, b, alpha);
-	// Correct the offset of the coloured dot for big-cursor mode
-	cairo_rectangle(cr, centerX, centerY, size, size);
-	cairo_fill(cr);
 	cairo_destroy(cr);
 	GdkPixbuf* pixbuf = xoj_pixbuf_get_from_surface(crCursor, 0, 0, width, height);
 	cairo_surface_destroy(crCursor);
