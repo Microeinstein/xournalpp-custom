@@ -107,9 +107,10 @@ void PageTemplateDialog::saveToFile()
 
 	saveToModel();
 
-	GtkWidget* dialog = gtk_file_chooser_dialog_new(_("Save File"), GTK_WINDOW(this->getWindow()),
-													GTK_FILE_CHOOSER_ACTION_SAVE, _("_Cancel"), GTK_RESPONSE_CANCEL,
-													_("_Save"), GTK_RESPONSE_OK, NULL);
+    GtkFileChooserNative* dialog = gtk_file_chooser_native_new(_("Save File"), GTK_WINDOW(this->getWindow()),
+													GTK_FILE_CHOOSER_ACTION_SAVE,
+													_("_Save"),
+                                                    _("_Cancel"));
 
 	gtk_file_chooser_set_local_only(GTK_FILE_CHOOSER(dialog), true);
 
@@ -133,9 +134,9 @@ void PageTemplateDialog::saveToFile()
 	gtk_file_chooser_set_do_overwrite_confirmation(GTK_FILE_CHOOSER(dialog), true);
 
 	gtk_window_set_transient_for(GTK_WINDOW(dialog), GTK_WINDOW(this->getWindow()));
-	if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_OK)
+	if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(dialog)) != GTK_RESPONSE_ACCEPT)
 	{
-		gtk_widget_destroy(dialog);
+        // gtk_widget_destroy(dialog);
 		return;
 	}
 
@@ -147,7 +148,7 @@ void PageTemplateDialog::saveToFile()
 	g_free(folder);
 	g_free(name);
 
-	gtk_widget_destroy(dialog);
+    // gtk_widget_destroy(dialog);
 
 
 	ofstream out;

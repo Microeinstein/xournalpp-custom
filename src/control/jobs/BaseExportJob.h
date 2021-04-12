@@ -44,7 +44,7 @@ private:
 	XOJ_TYPE_ATTRIB;
 
 protected:
-	GtkWidget* dialog = NULL;
+	GtkFileChooserNative* dialog = NULL;
 
 	Path filename;
 

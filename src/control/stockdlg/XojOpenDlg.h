@@ -35,13 +35,15 @@ protected:
 
 	Path runDialog();
 
+    /*
 private:
 	static void updatePreviewCallback(GtkFileChooser* fileChooser, void* userData);
+    */
 
 private:
 	XOJ_TYPE_ATTRIB;
 
-	GtkWidget* dialog;
+    GtkFileChooserNative* dialog;
 
 	GtkWindow* win;
 	Settings* settings;

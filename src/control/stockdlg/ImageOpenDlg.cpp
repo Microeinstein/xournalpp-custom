@@ -8,9 +8,8 @@
 
 GFile* ImageOpenDlg::show(GtkWindow* win, Settings* settings, bool localOnly, bool* attach)
 {
-	GtkWidget* dialog = gtk_file_chooser_dialog_new(_("Open Image"), win, GTK_FILE_CHOOSER_ACTION_OPEN,
-													_("_Cancel"), GTK_RESPONSE_CANCEL,
-													_("_Open"), GTK_RESPONSE_OK, NULL);
+    GtkFileChooserNative* dialog = gtk_file_chooser_native_new(_("Open Image"), win, GTK_FILE_CHOOSER_ACTION_OPEN,
+                                                    _("_Open"), _("_Cancel"));
 
 	gtk_file_chooser_set_local_only(GTK_FILE_CHOOSER(dialog), localOnly);
 
@@ -29,17 +28,17 @@ GFile* ImageOpenDlg::show(GtkWindow* win, Settings* settings, bool localOnly, bo
 	{
 		cbAttach = gtk_check_button_new_with_label(_("Attach file to the journal"));
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(cbAttach), false);
-		gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(dialog), cbAttach);
+		// gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(dialog), cbAttach);
 	}
 
 	GtkWidget* image = gtk_image_new();
-	gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(dialog), image);
-	g_signal_connect(dialog, "update-preview", G_CALLBACK(updatePreviewCallback), NULL);
+	// gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(dialog), image);
+	// g_signal_connect(dialog, "update-preview", G_CALLBACK(updatePreviewCallback), NULL);
 
 	gtk_window_set_transient_for(GTK_WINDOW(dialog), win);
-	if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_OK)
+	if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(dialog)) != GTK_RESPONSE_ACCEPT)
 	{
-		gtk_widget_destroy(dialog);
+		// gtk_widget_destroy(dialog);
 		return NULL;
 	}
 	GFile* file = gtk_file_chooser_get_file(GTK_FILE_CHOOSER(dialog));
@@ -58,13 +57,14 @@ GFile* ImageOpenDlg::show(GtkWindow* win, Settings* settings, bool localOnly, bo
 		g_free(folder);
 	}
 
-	gtk_widget_destroy(dialog);
+	// gtk_widget_destroy(dialog);
 
 	return file;
 }
 
 // Source: Empathy
 
+/*
 GdkPixbuf* ImageOpenDlg::pixbufScaleDownIfNecessary(GdkPixbuf* pixbuf, gint maxSize)
 {
 	int width = gdk_pixbuf_get_width(pixbuf);
@@ -109,3 +109,4 @@ void ImageOpenDlg::updatePreviewCallback(GtkFileChooser* fileChooser, void* user
 
 	gtk_file_chooser_set_preview_widget_active(fileChooser, true);
 }
+*/

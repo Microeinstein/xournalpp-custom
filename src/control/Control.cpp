@@ -2737,14 +2737,11 @@ bool Control::showSaveDialog()
 {
 	XOJ_CHECK_TYPE(Control);
 
-	GtkWidget* dialog = gtk_file_chooser_dialog_new(_("Save File"),
+    GtkFileChooserNative* dialog = gtk_file_chooser_native_new(_("Save File"),
 	                                                getGtkWindow(),
 	                                                GTK_FILE_CHOOSER_ACTION_SAVE,
-	                                                _("_Cancel"),
-	                                                GTK_RESPONSE_CANCEL,
 	                                                _("_Save"),
-	                                                GTK_RESPONSE_OK,
-	                                                nullptr);
+	                                                _("_Cancel"));
 
 	gtk_file_chooser_set_local_only(GTK_FILE_CHOOSER(dialog), true);
 
@@ -2768,9 +2765,9 @@ bool Control::showSaveDialog()
 
 	while (true)
 	{
-		if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_OK)
+		if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(dialog)) != GTK_RESPONSE_ACCEPT)
 		{
-			gtk_widget_destroy(dialog);
+			// gtk_widget_destroy(dialog);
 			return false;
 		}
 
@@ -2794,7 +2791,7 @@ bool Control::showSaveDialog()
 	g_free(folder);
 	g_free(name);
 
-	gtk_widget_destroy(dialog);
+	// gtk_widget_destroy(dialog);
 
 	this->doc->lock();
 

@@ -13,9 +13,8 @@ XojOpenDlg::XojOpenDlg(GtkWindow* win, Settings* settings)
 {
 	XOJ_INIT_TYPE(XojOpenDlg);
 
-	dialog = gtk_file_chooser_dialog_new(_("Open file"), win, GTK_FILE_CHOOSER_ACTION_OPEN,
-										 _("_Cancel"), GTK_RESPONSE_CANCEL,
-										 _("_Open"), GTK_RESPONSE_OK, NULL);
+	dialog = gtk_file_chooser_native_new(_("Open file"), win, GTK_FILE_CHOOSER_ACTION_OPEN,
+                                         _("_Open"), _("_Cancel"));
 
 	gtk_file_chooser_set_local_only(GTK_FILE_CHOOSER(dialog), true);
 
@@ -38,7 +37,7 @@ XojOpenDlg::~XojOpenDlg()
 
 	if (dialog)
 	{
-		gtk_widget_destroy(dialog);
+        // gtk_widget_destroy(dialog);
 	}
 	dialog = NULL;
 
@@ -101,9 +100,9 @@ Path XojOpenDlg::runDialog()
 	XOJ_CHECK_TYPE(XojOpenDlg);
 
 	gtk_window_set_transient_for(GTK_WINDOW(dialog), win);
-	if (gtk_dialog_run(GTK_DIALOG(dialog)) != GTK_RESPONSE_OK)
+	if (gtk_native_dialog_run(GTK_NATIVE_DIALOG(dialog)) != GTK_RESPONSE_ACCEPT)
 	{
-		gtk_widget_destroy(dialog);
+        // gtk_widget_destroy(dialog);
 		dialog = NULL;
 		return Path("");
 	}
@@ -154,12 +153,12 @@ Path XojOpenDlg::showOpenDialog(bool pdf, bool& attachPdf)
 		attachOpt = gtk_check_button_new_with_label(_("Attach file to the journal"));
 		g_object_ref(attachOpt);
 		gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(attachOpt), FALSE);
-		gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(dialog), attachOpt);
+		// gtk_file_chooser_set_extra_widget(GTK_FILE_CHOOSER(dialog), attachOpt);
 	}
 
 	GtkWidget* image = gtk_image_new();
-	gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(dialog), image);
-	g_signal_connect(dialog, "update-preview", G_CALLBACK(updatePreviewCallback), NULL);
+	// gtk_file_chooser_set_preview_widget(GTK_FILE_CHOOSER(dialog), image);
+	//g_signal_connect(dialog, "update-preview", G_CALLBACK(updatePreviewCallback), NULL);
 
 	auto lastOpenPath = this->settings->getLastOpenPath();
 	if (!lastOpenPath.isEmpty())
@@ -190,6 +189,7 @@ Path XojOpenDlg::showOpenDialog(bool pdf, bool& attachPdf)
 	return file;
 }
 
+/*
 void XojOpenDlg::updatePreviewCallback(GtkFileChooser* fileChooser, void* userData)
 {
 	gchar* filename = gtk_file_chooser_get_preview_filename(fileChooser);
@@ -241,3 +241,4 @@ void XojOpenDlg::updatePreviewCallback(GtkFileChooser* fileChooser, void* userDa
 		gtk_file_chooser_set_preview_widget_active(fileChooser, true);
 	}
 }
+*/
