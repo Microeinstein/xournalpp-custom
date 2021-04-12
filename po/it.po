@@ -791,7 +791,7 @@ msgstr "PDF creato con successo"
 #: ../src/control/jobs/PdfExportJob.cpp:23
 #: ../src/control/stockdlg/XojOpenDlg.cpp:63
 msgid "PDF files"
-msgstr "Files PDF"
+msgstr "PDF"
 
 #: ../src/control/XournalMain.cpp:314
 msgid "PDF output filename"
@@ -803,7 +803,7 @@ msgstr "PDF con sfondo bianco"
 
 #: ../src/control/jobs/CustomExportJob.cpp:25
 msgid "PNG graphics"
-msgstr "Grafica PNG"
+msgstr "PNG"
 
 #: ../src/control/jobs/CustomExportJob.cpp:26
 msgid "PNG with transparent background"
@@ -937,11 +937,11 @@ msgstr "Righello"
 
 #: ../src/control/jobs/CustomExportJob.cpp:27
 msgid "SVG graphics"
-msgstr "Grafica PNG"
+msgstr "SVG"
 
 #: ../src/control/jobs/CustomExportJob.cpp:28
 msgid "SVG with transparent background"
-msgstr "Grafica PNG con sfondo trasparente"
+msgstr "SVG con sfondo trasparente"
 
 #: ../src/control/Control.cpp:2942 ../src/control/jobs/SaveJob.cpp:13
 #: ../src/gui/toolbarMenubar/ToolMenuHandler.cpp:393
@@ -1743,11 +1743,11 @@ msgstr "Azione al tap (pressione breve) dello strumento"
 
 #: ../ui/settings.glade:2914
 msgid "Add additional horizontal space of"
-msgstr "<b>Aggiungi spazio orizzontale</b>"
+msgstr "Aggiungi spazio orizzontale"
 
 #: ../ui/settings.glade:2892
 msgid "Add additional vertical space of"
-msgstr "<b>Aggiungi spazio verticale</b>"
+msgstr "Aggiungi spazio verticale"
 
 #: ../ui/exportSettings.glade:142
 msgid "All pages"
@@ -1853,11 +1853,11 @@ msgstr "Tema Scuro (necessita riavvio) "
 
 #: ../ui/settings.glade:491
 msgid "Default Save Name"
-msgstr "<b>Nome salvataggio predefinito</b> "
+msgstr "Nome salvataggio predefinito"
 
 #: ../ui/settings.glade:379
 msgid "Default name: "
-msgstr "<b>Nome predefinito:</b> "
+msgstr "Nome predefinito: "
 
 #: ../ui/settings.glade:3601
 msgid "Defaults"
@@ -1963,7 +1963,7 @@ msgstr "Attiva le gestures per lo zoom (GTK Touch/Scrolling workaround) (necessi
 
 #: ../ui/settings.glade:1107
 msgid "Enable Pressure Sensitivity"
-msgstr "<b>Sensibilità alla Pressione</b>"
+msgstr "Sensibilità alla Pressione"
 
 #: ../ui/settings.glade:3259
 msgid "Enable Tap action"
@@ -2141,7 +2141,7 @@ msgstr "Layout"
 
 #: ../ui/settings.glade:2242
 msgid "Left / Right-Handed"
-msgstr "<b>Destro / Mancino</b>"
+msgstr "Destro / Mancino"
 
 #: ../ui/about.glade:265
 msgid "License"
@@ -2170,7 +2170,7 @@ msgstr ""
 
 #: ../ui/settings.glade:954
 msgid "Middle Mouse Button"
-msgstr "<b>Pulsante centrale del mouse</b> "
+msgstr "Pulsante centrale del mouse "
 
 #: ../ui/settings.glade:1041 ../ui/settingsDeviceClassConfig.glade:42
 msgid "Mouse"
@@ -2288,7 +2288,7 @@ msgstr "Modalità Presentazione"
 
 #: ../ui/settings.glade:1129
 msgid "Pressure Sensitivity"
-msgstr "<b>Sensibilità alla Pressione</b> "
+msgstr "Sensibilità alla Pressione "
 
 #: ../ui/about.glade:167
 msgid "RELEASE_IDENTIFIER"
@@ -2328,11 +2328,11 @@ msgstr "Frequenza di Campionamento"
 
 #: ../ui/settings.glade:2321
 msgid "Scrollbars"
-msgstr "<b>Barre di scorrimento</b>"
+msgstr "Barre di scorrimento"
 
 #: ../ui/settings.glade:2986
 msgid "Scrolling outside the page"
-msgstr "<b>Scrolling fuori dalla pagina</b>"
+msgstr "Scrolling fuori dalla pagina"
 
 #: ../ui/pageTemplate.glade:174
 msgid "Select Background Color"
