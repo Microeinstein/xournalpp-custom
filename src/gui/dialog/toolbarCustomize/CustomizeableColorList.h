@@ -11,25 +11,23 @@
 
 #pragma once
 
-#include <XournalType.h>
+#include <string>
+#include <vector>
 
 #include "gui/XojColor.h"
 
-class CustomizeableColorList
-{
+#include "XournalType.h"
+
+class CustomizeableColorList {
 public:
-	CustomizeableColorList();
-	virtual ~CustomizeableColorList();
+    CustomizeableColorList();
 
 public:
-	vector<XojColor*>* getPredefinedColors();
+    const vector<XojColor>& getPredefinedColors() const;
 
 private:
-	void addPredefinedColor(int color, string name);
+    void addPredefinedColor(Color color, string name);
 
 private:
-	XOJ_TYPE_ATTRIB;
-
-	vector<XojColor*> colors;
-
+    vector<XojColor> colors;
 };

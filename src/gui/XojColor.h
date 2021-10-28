@@ -11,22 +11,23 @@
 
 #pragma once
 
-#include <XournalType.h>
+#include <string>
+#include <vector>
 
-class XojColor
-{
+#include "util/Color.h"
+
+#include "XournalType.h"
+
+struct XojColor {
 public:
-	XojColor(int color, string name);
-	virtual ~XojColor();
+    XojColor(Color color, std::string name);
 
 public:
-	int getColor();
-	string getName();
+    Color getColor() const;
+    string getName() const;
 
 private:
-	XOJ_TYPE_ATTRIB;
-
-	int color;
-	// the localized name of the color
-	string name;
+    Color color;
+    // the localized name of the color
+    std::string name;
 };

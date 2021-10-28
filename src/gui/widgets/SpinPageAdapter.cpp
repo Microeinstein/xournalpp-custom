@@ -1,109 +1,85 @@
 #include "SpinPageAdapter.h"
 
-SpinPageAdapter::SpinPageAdapter()
-{
-	XOJ_INIT_TYPE(SpinPageAdapter);
+SpinPageAdapter::SpinPageAdapter() {}
 
-	this->lastTimeoutId = 0;
-	this->widget = gtk_spin_button_new_with_range(0, 0, 1);
-	g_object_ref(this->widget);
-
-	g_signal_connect(this->widget, "value-changed", G_CALLBACK(pageNrSpinChangedCallback), this);
-
-	this->page = -1;
+SpinPageAdapter::~SpinPageAdapter() {
+    if (this->hasWidget()) {
+        this->removeWidget();
+    }
 }
 
-SpinPageAdapter::~SpinPageAdapter()
-{
-	XOJ_CHECK_TYPE(SpinPageAdapter);
+auto SpinPageAdapter::pageNrSpinChangedTimerCallback(SpinPageAdapter* adapter) -> bool {
+    adapter->lastTimeoutId = 0;
+    adapter->page = static_cast<size_t>(gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(adapter->widget)));
 
-	g_object_unref(this->widget);
-	this->widget = NULL;
-
-	XOJ_RELEASE_TYPE(SpinPageAdapter);
+    adapter->firePageChanged();
+    return false;
 }
 
-bool SpinPageAdapter::pageNrSpinChangedTimerCallback(SpinPageAdapter* adapter)
-{
-	XOJ_CHECK_TYPE_OBJ(adapter, SpinPageAdapter);
-	adapter->lastTimeoutId = 0;
-	adapter->page = gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(adapter->widget));
+void SpinPageAdapter::pageNrSpinChangedCallback(GtkSpinButton* spinbutton, SpinPageAdapter* adapter) {
+    // Nothing changed.
+    if (gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(spinbutton)) == static_cast<uint64_t>(adapter->page)) {
+        return;
+    }
 
-	adapter->firePageChanged();
-	return false;
+    if (adapter->lastTimeoutId) {
+        g_source_remove(adapter->lastTimeoutId);
+    }
+
+    // Give the spin button some time to release, if we don't do he will send new events...
+    adapter->lastTimeoutId = g_timeout_add(100, reinterpret_cast<GSourceFunc>(pageNrSpinChangedTimerCallback), adapter);
 }
 
-void SpinPageAdapter::pageNrSpinChangedCallback(GtkSpinButton* spinbutton, SpinPageAdapter* adapter)
-{
-	XOJ_CHECK_TYPE_OBJ(adapter, SpinPageAdapter);
+bool SpinPageAdapter::hasWidget() { return this->widget != nullptr; }
 
-	// Nothing changed.
-	if (gtk_spin_button_get_value_as_int(GTK_SPIN_BUTTON(spinbutton)) == (long) adapter->page)
-	{
-		return;
-	}
+void SpinPageAdapter::setWidget(GtkWidget* widget) {
+    // only one widget is supported and the previous widget has to be removed via removeWidget
+    g_assert(!this->hasWidget());
+    g_assert_nonnull(widget);
 
-	if (adapter->lastTimeoutId)
-	{
-		g_source_remove(adapter->lastTimeoutId);
-	}
+    this->widget = widget;
+    this->pageNrSpinChangedHandlerId =
+            g_signal_connect(this->widget, "value-changed", G_CALLBACK(pageNrSpinChangedCallback), this);
+    this->lastTimeoutId = 0;
 
-	// Give the spin button some time to realease, if we don't do he will send new events...
-	adapter->lastTimeoutId = g_timeout_add(100, (GSourceFunc) pageNrSpinChangedTimerCallback, adapter);
+    gtk_spin_button_set_range(GTK_SPIN_BUTTON(this->widget), static_cast<double>(this->min),
+                              static_cast<double>(this->max));
+    gtk_spin_button_set_value(GTK_SPIN_BUTTON(this->widget), static_cast<double>(this->page));
 }
 
-GtkWidget* SpinPageAdapter::getWidget()
-{
-	XOJ_CHECK_TYPE(SpinPageAdapter);
+void SpinPageAdapter::removeWidget() {
+    g_assert(this->hasWidget());
 
-	return this->widget;
+    g_signal_handler_disconnect(this->widget, this->pageNrSpinChangedHandlerId);
+
+    g_clear_object(&this->widget);
 }
 
-int SpinPageAdapter::getPage()
-{
-	XOJ_CHECK_TYPE(SpinPageAdapter);
+auto SpinPageAdapter::getPage() const -> int { return this->page; }
 
-	return this->page;
+void SpinPageAdapter::setPage(size_t page) {
+    this->page = page;
+    if (this->widget) {
+        gtk_spin_button_set_value(GTK_SPIN_BUTTON(this->widget), static_cast<double>(page));
+    }
 }
 
-void SpinPageAdapter::setPage(size_t page)
-{
-	XOJ_CHECK_TYPE(SpinPageAdapter);
-
-	this->page = page;
-	gtk_spin_button_set_value(GTK_SPIN_BUTTON(this->widget), page);
+void SpinPageAdapter::setMinMaxPage(size_t min, size_t max) {
+    this->min = min;
+    this->max = max;
+    if (this->widget) {
+        gtk_spin_button_set_range(GTK_SPIN_BUTTON(this->widget), static_cast<double>(min), static_cast<double>(max));
+    }
 }
 
-void SpinPageAdapter::setMinMaxPage(size_t min, size_t max)
-{
-	XOJ_CHECK_TYPE(SpinPageAdapter);
+void SpinPageAdapter::addListener(SpinPageListener* listener) { this->listener.push_back(listener); }
 
-	gtk_spin_button_set_range(GTK_SPIN_BUTTON(this->widget), min, max);
+void SpinPageAdapter::removeListener(SpinPageListener* listener) { this->listener.remove(listener); }
+
+void SpinPageAdapter::firePageChanged() {
+    for (SpinPageListener* listener: this->listener) {
+        listener->pageChanged(this->page);
+    }
 }
 
-void SpinPageAdapter::addListener(SpinPageListener* listener)
-{
-	XOJ_CHECK_TYPE(SpinPageAdapter);
-
-	this->listener.push_back(listener);
-}
-
-void SpinPageAdapter::removeListener(SpinPageListener* listener)
-{
-	XOJ_CHECK_TYPE(SpinPageAdapter);
-
-	this->listener.remove(listener);
-}
-
-void SpinPageAdapter::firePageChanged()
-{
-	XOJ_CHECK_TYPE(SpinPageAdapter);
-
-	for (SpinPageListener* listener : this->listener)
-	{
-		listener->pageChanged(this->page);
-	}
-}
-
-SpinPageListener::~SpinPageListener() { }
-
+SpinPageListener::~SpinPageListener() = default;

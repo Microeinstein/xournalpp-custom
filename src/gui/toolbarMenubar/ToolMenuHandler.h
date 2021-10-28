@@ -11,11 +11,13 @@
 
 #pragma once
 
+#include <gtk/gtk.h>
+
+#include "control/Actions.h"
+#include "util/IconNameHelper.h"
+
 #include "ColorToolItem.h"
 #include "MenuItem.h"
-#include "control/Actions.h"
-
-#include <gtk/gtk.h>
 
 class AbstractToolItem;
 class FontButton;
@@ -33,85 +35,87 @@ class ZoomControl;
 class Control;
 class PageBackgroundChangeController;
 
-class ToolMenuHandler
-{
+class ToolMenuHandler {
 public:
-	ToolMenuHandler(Control* control, GladeGui* gui, GtkWindow* parent);
-	virtual ~ToolMenuHandler();
+    ToolMenuHandler(Control* control, GladeGui* gui, GtkWindow* parent);
+    virtual ~ToolMenuHandler();
 
 public:
-	void freeDynamicToolbarItems();
-	void unloadToolbar(GtkWidget* tBunload);
+    void freeDynamicToolbarItems();
+    static void unloadToolbar(GtkWidget* toolbar);
 
-	void load(ToolbarData* d, GtkWidget* toolbar, const char* toolbarName, bool horizontal);
+    void load(ToolbarData* d, GtkWidget* toolbar, const char* toolbarName, bool horizontal);
 
-	void registerMenupoint(GtkWidget* widget, ActionType type, ActionGroup group = GROUP_NOGROUP);
+    void registerMenupoint(GtkWidget* widget, ActionType type, ActionGroup group = GROUP_NOGROUP);
 
-	void initToolItems();
+    void initToolItems();
 
-	void setUndoDescription(string description);
-	void setRedoDescription(string description);
+    void setUndoDescription(const string& description);
+    void setRedoDescription(const string& description);
 
-	SpinPageAdapter* getPageSpinner();
-	void setPageText(string text);
+    SpinPageAdapter* getPageSpinner();
+    void setPageInfo(size_t pagecount, size_t pdfpage = 0);
 
-	void setFontButtonFont(XojFont& font);
-	XojFont getFontButtonFont();
+    void setFontButtonFont(XojFont& font);
+    XojFont getFontButtonFont();
 
-	void showFontSelectionDlg();
+    void showFontSelectionDlg();
 
-	void setTmpDisabled(bool disabled);
+    void setTmpDisabled(bool disabled);
 
-	void removeColorToolItem(AbstractToolItem* it);
-	void addColorToolItem(AbstractToolItem* it);
+    void removeColorToolItem(AbstractToolItem* it);
+    void addColorToolItem(AbstractToolItem* it);
 
-	ToolbarModel* getModel();
+    ToolbarModel* getModel();
 
-	vector<AbstractToolItem*>* getToolItems();
+    vector<AbstractToolItem*>* getToolItems();
 
-	bool isColorInUse(int color);
+    bool isColorInUse(Color color);
 
-	void disableAudioPlaybackButtons();
+    void disableAudioPlaybackButtons();
 
-	void enableAudioPlaybackButtons();
+    void enableAudioPlaybackButtons();
 
-	void setAudioPlaybackPaused(bool paused);
+    void setAudioPlaybackPaused(bool paused);
+    std::string iconName(const char* icon);
 
 private:
-	void addToolItem(AbstractToolItem* it);
+    void addToolItem(AbstractToolItem* it);
 
-	static void signalConnectCallback(GtkBuilder* builder, GObject* object, const gchar* signalName,
-				const gchar* handlerName, GObject* connectObject, GConnectFlags flags, ToolMenuHandler* self);
-	void initPenToolItem();
-	void initEraserToolItem();
+    static void signalConnectCallback(GtkBuilder* builder, GObject* object, const gchar* signalName,
+                                      const gchar* handlerName, GObject* connectObject, GConnectFlags flags,
+                                      ToolMenuHandler* self);
+    void initPenToolItem();
+    void initEraserToolItem();
 
 private:
-	XOJ_TYPE_ATTRIB;
+    vector<ColorToolItem*> toolbarColorItems;
+    GtkWindow* parent = nullptr;
 
-	vector<ColorToolItem*> toolbarColorItems;
-	GtkWindow* parent = NULL;
+    vector<AbstractToolItem*> toolItems;
+    vector<MenuItem*> menuItems;
 
-	vector<AbstractToolItem*> toolItems;
-	vector<MenuItem*> menuItems;
+    ToolButton* undoButton = nullptr;
+    ToolButton* redoButton = nullptr;
 
-	ToolButton* undoButton = NULL;
-	ToolButton* redoButton = NULL;
+    ToolButton* audioPausePlaybackButton = nullptr;
+    ToolButton* audioStopPlaybackButton = nullptr;
+    ToolButton* audioSeekBackwardsButton = nullptr;
+    ToolButton* audioSeekForwardsButton = nullptr;
 
-	ToolButton* audioPausePlaybackButton = NULL;
-	ToolButton* audioStopPlaybackButton = NULL;
+    ToolPageSpinner* toolPageSpinner = nullptr;
+    ToolPageLayer* toolPageLayer = nullptr;
+    FontButton* fontButton = nullptr;
 
-	ToolPageSpinner* toolPageSpinner = NULL;
-	ToolPageLayer* toolPageLayer = NULL;
-	FontButton* fontButton = NULL;
+    Control* control = nullptr;
+    ActionHandler* listener = nullptr;
+    ZoomControl* zoom = nullptr;
+    GladeGui* gui = nullptr;
+    ToolHandler* toolHandler = nullptr;
 
-	Control* control = NULL;
-	ActionHandler* listener = NULL;
-	ZoomControl* zoom = NULL;
-	GladeGui* gui = NULL;
-	ToolHandler* toolHandler = NULL;
+    ToolbarModel* tbModel = nullptr;
 
-	ToolbarModel* tbModel = NULL;
-
-	PageTypeMenu* newPageType = NULL;
-	PageBackgroundChangeController* pageBackgroundChangeController = NULL;
+    PageTypeMenu* newPageType = nullptr;
+    PageBackgroundChangeController* pageBackgroundChangeController = nullptr;
+    IconNameHelper iconNameHelper;
 };

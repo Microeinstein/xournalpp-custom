@@ -1,107 +1,70 @@
 #include "ToolbarEntry.h"
 
-ToolbarEntry::ToolbarEntry()
-{
-	XOJ_INIT_TYPE(ToolbarEntry);
+#include <algorithm>
+#include <utility>
+
+ToolbarEntry::ToolbarEntry() = default;
+
+ToolbarEntry::ToolbarEntry(const ToolbarEntry& e) { *this = e; }
+ToolbarEntry::ToolbarEntry(ToolbarEntry&& e) { *this = std::move(e); }
+
+ToolbarEntry& ToolbarEntry::operator=(const ToolbarEntry& e) {
+    this->name = e.name;
+    std::vector<ToolbarItem*> entries;
+    for (ToolbarItem* item: e.entries) {
+        entries.push_back(new ToolbarItem(*item));
+    }
+    clearList();
+    this->entries = std::move(entries);
+    return *this;
 }
 
-ToolbarEntry::ToolbarEntry(const ToolbarEntry& e)
-{
-	XOJ_INIT_TYPE(ToolbarEntry);
-
-	*this = e;
+ToolbarEntry& ToolbarEntry::operator=(ToolbarEntry&& e) {
+    this->name = std::move(e.name);
+    std::swap(this->entries, e.entries);
+    return *this;
 }
 
-void ToolbarEntry::operator=(const ToolbarEntry& e)
-{
-	XOJ_CHECK_TYPE(ToolbarEntry);
+ToolbarEntry::~ToolbarEntry() { clearList(); }
 
-	this->name = e.name;
-	clearList();
-
-	for (ToolbarItem* item : e.entries)
-	{
-		entries.push_back(new ToolbarItem(*item));
-	}
+void ToolbarEntry::clearList() {
+    for (ToolbarItem* item: entries) {
+        delete item;
+    }
+    entries.clear();
 }
 
-ToolbarEntry::~ToolbarEntry()
-{
-	XOJ_CHECK_TYPE(ToolbarEntry);
+auto ToolbarEntry::getName() -> string { return this->name; }
 
-	clearList();
+void ToolbarEntry::setName(string name) { this->name = std::move(name); }
 
-	XOJ_RELEASE_TYPE(ToolbarEntry);
+auto ToolbarEntry::addItem(string item) -> int {
+    auto* it = new ToolbarItem(std::move(item));
+    entries.push_back(it);
+
+    return it->getId();
 }
 
-void ToolbarEntry::clearList()
-{
-	for (ToolbarItem* item : entries)
-	{
-		delete item;
-	}
-	entries.clear();
+auto ToolbarEntry::removeItemById(int id) -> bool {
+    for (auto it = this->entries.begin(); it != this->entries.end(); it++) {
+        if ((*it)->getId() == id) {
+            delete *it;
+            this->entries.erase(it);
+            return true;
+        }
+    }
+    return false;
 }
 
-string ToolbarEntry::getName()
-{
-	XOJ_CHECK_TYPE(ToolbarEntry);
+auto ToolbarEntry::insertItem(string item, int position) -> int {
+    auto* it = new ToolbarItem(std::move(item));
+    if (position >= static_cast<int>(entries.size())) {
+        entries.push_back(it);
+        return it->getId();
+    }
 
-	return this->name;
+    entries.insert(entries.begin() + position, it);
+    return it->getId();
 }
 
-void ToolbarEntry::setName(string name)
-{
-	XOJ_CHECK_TYPE(ToolbarEntry);
-
-	this->name = name;
-}
-
-int ToolbarEntry::addItem(string item)
-{
-	XOJ_CHECK_TYPE(ToolbarEntry);
-
-	ToolbarItem* it = new ToolbarItem(item);
-	entries.push_back(it);
-
-	return it->getId();
-}
-
-bool ToolbarEntry::removeItemById(int id)
-{
-	XOJ_CHECK_TYPE(ToolbarEntry);
-
-	for (unsigned int i = 0; i < this->entries.size(); i++)
-	{
-		if (this->entries[i]->getId() == id)
-		{
-			delete this->entries[i];
-			entries[i] = NULL;
-			entries.erase(entries.begin() + i);
-			return true;
-		}
-	}
-	return false;
-}
-
-int ToolbarEntry::insertItem(string item, int position)
-{
-	XOJ_CHECK_TYPE(ToolbarEntry);
-
-	ToolbarItem* it = new ToolbarItem(item);
-	if (position >= (int)entries.size())
-	{
-		entries.push_back(it);
-		return it->getId();
-	}
-
-	entries.insert(entries.begin() + position, it);
-	return it->getId();
-}
-
-const ToolbarItemVector& ToolbarEntry::getItems() const
-{
-	XOJ_CHECK_TYPE(ToolbarEntry);
-
-	return entries;
-}
+auto ToolbarEntry::getItems() const -> const ToolbarItemVector& { return entries; }
